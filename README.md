@@ -8,7 +8,7 @@ O programa desenvolve é um programa gratuito de formação e inclusão de talen
 <br>
 
 ### O projeto
-Nesse repositório coloco algumas das aulas que fizemos voltada a linguagem Javascript, com o foco em backend.
+Nesse repositório coloco algumas das aulas que fizemos voltada a linguagem Javascript.
 
 ### Tecnologias usadas
 - Javascript;
