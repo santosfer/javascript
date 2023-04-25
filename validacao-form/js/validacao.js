@@ -42,12 +42,27 @@ const mensagensDeErro = {
    cpf: {
       valueMissing: 'O campo CPF não pode estar vazio.',
       customError: 'O CPF digitado não é válido.'
+   },
+   cep: {
+      valueMissing: 'O campo CEP não pode estar vazio.',
+      patternMismatch: 'O CEP digitado não é válido.',
+      customError: 'Não foi possível buscar o CEP.'
+   },
+   logradouro: {
+      valueMissing: 'O campo logradouro não pode estar vazio.',
+   },
+   cidade: {
+      valueMissing: 'O campo cidade não pode estar vazio.'
+   },
+   estado: {
+      valueMissing: 'O campo estado não pode estar vazio.'
    }
 }
 
 const validadores = {
    dataNascimento: input => validaDataNascimento(input),
-   cpf: input => validaCPF(input)
+   cpf: input => validaCPF(input),
+   cep: input => recuperarCEP(input)
 }
 
 // const dataNascimento = document.querySelector('#nascimento')
@@ -89,14 +104,14 @@ function validaCPF(input) {
    const cpfFormatado = input.value.replace(/\D/g, '')
    let mensagem = ''
 
-   if (!chacaCPFRepetido(cpfFormatado) || !checaEstruturaCPF(cpfFormatado)) {
-      mensagem = 'O cpf digitado não é válido.'
+   if (!checaCPFRepetido(cpfFormatado) || !checaEstruturaCPF(cpfFormatado)) {
+      mensagem = 'O CPF digitado não é válido.'
    }
 
    input.setCustomValidity(mensagem)
 }
 
-function chacaCPFRepetido(cpf) {
+function checaCPFRepetido(cpf) {
    const valoresRepetidos = [
       '00000000000',
       '11111111111',
@@ -109,7 +124,6 @@ function chacaCPFRepetido(cpf) {
       '88888888888',
       '99999999999'
    ]
-
    let cpfValido = true
 
    valoresRepetidos.forEach(valor => {
@@ -152,6 +166,42 @@ function confirmaDigito(soma) {
    return 11 - (soma % 11)
 }
 
-// let soma = (10*1) + (9*2) + (8*3)
+function recuperarCEP(input) {
+   const cep = input.value.replace(/\D/g, '')
+   const url = `https://viacep.com.br/ws/${cep}/json/`
+   const options = {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+         'content-type': 'application/json;charset=utf-8'
+      }
+   }
 
-// let difitoVerificador = 11 - (soma/11)
+   if (!input.validity.patternMismatch && !input.validity.valueMissing) {
+      fetch(url, options).then(
+         response => response.json()
+      ).then(
+         data => {
+            if (data.erro) {
+               input.setCustomValidity('Não foi possível buscar o CEP.')
+               return
+            }
+            input.setCustomValidity('')
+            preencheCamposComCEP(data)
+            return
+         }
+      )
+   }
+
+}
+
+function preencheCamposComCEP(data) {
+   const logradouro = document.querySelector('[data-tipo="logradouro"]')
+   const cidade = document.querySelector('[data-tipo="cidade"]')
+   const estado = document.querySelector('[data-tipo="estado"]')
+
+   logradouro.value = data.logradouro
+   cidade.value = data.localidade
+   estado.value = data.uf
+
+}
